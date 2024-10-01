@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  onSubmit: (url: string) => void; // Declare the onSubmit prop type
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All categories');
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,7 +29,9 @@ const SearchBar: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(`Searching for ${searchTerm} in category ${selectedCategory}`);
+    if (searchTerm) {
+      onSubmit(searchTerm); // Trigger the onSubmit callback with the search term
+    }
   };
 
   // Close dropdown if clicked outside
