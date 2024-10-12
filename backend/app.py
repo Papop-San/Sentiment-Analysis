@@ -17,64 +17,42 @@ youtube = build('youtube', 'v3', developerKey=API_KEY)
 # Thai stopwords
 thai_stopwords = list(thai_stopwords())
 
-# Helper functions
+# Analyze the sentiment of a comment
 def analyze_sentiment(comment):
     sentiment_dict = analyzer.polarity_scores(comment)
     return sentiment_dict['compound']
 
-def text_process(text):
-    # Convert the input to a string to ensure it's iterable
-    text = str(text)
-    final = "".join(u for u in text if u not in ("?", ".", ";", ":", "!", '"', "ๆ", "ฯ"))
-    final = word_tokenize(final)
-    final = " ".join(word for word in final)
-    final = " ".join(word for word in final.split()
-                     if word.lower() not in thai_stopwords)  # Call lower() method
-    return final
+# Identify people based on predefined keywords
+def find_people_in_comment(comment):
+    words = word_tokenize(comment)
+    mentioned_people = []
 
-def sentiment_scores(comment):
-    sentiment_object = SentimentIntensityAnalyzer()
-    sentiment_dict = sentiment_object.polarity_scores(comment)
-    return sentiment_dict['compound']
+    grandma_keywords = ['ทวดมะลิ', 'แม่มะลิ', 'มะลิ', 'ทวด']
+    father_keywords = ['โทนี่', 'พ่อ', 'พ่อโทนี่', 'พ่อโทนี', 'โทนี']
+    mother_keywords = ['โจน่า', 'แม่', 'แม่โจน่า', 'แม่โจนา', 'โจนา']
+    pig_keywords = ['หมู', 'เด้ง', 'น้องหมูเด้ง', 'น้อง', 'ฮิปโปตัวน้อย', 'ฮิบโปน้อย', 'ลูกฮิปโปแคระ', 'หลานหมูเด้ง', 'เหลนหมูเด้ง', 'เหลน', 'ลูกฮิปโป']
+    caretaker_keywords = ['พี่เลี้ยง', 'คนดูแล', 'พี่เลี้ยงหมูเด้ง', 'พี่เลี้ยงผู้ดูแลหมูเด้ง', 'นายอรรถพล หนุนดี', 'คีปเปอร์', 'นายอรรถพล', 'อรรถพล']
 
-def analyze_comments_from_file(file_path):
-    polarity = []
-    positive_comments = []
-    negative_comments = []
-    neutral_comments = []
+    if any(keyword in words for keyword in grandma_keywords):
+        mentioned_people.append('ทวดมะลิ')
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        comments = f.readlines()
+    if any(keyword in words for keyword in father_keywords):
+        mentioned_people.append('พ่อโทนี่')
 
-    print("Analyzing Comments...")
-    for item in comments:
-        score = sentiment_scores(item)
-        polarity.append(score)
+    if any(keyword in words for keyword in mother_keywords):
+        mentioned_people.append('แม่โจน่า')
 
-        if score > 0.05:
-            positive_comments.append(item.strip())
-        elif score < -0.05:
-            negative_comments.append(item.strip())
-        else:
-            neutral_comments.append(item.strip())
+    if any(keyword in words for keyword in pig_keywords):
+        mentioned_people.append('หมูเด้ง')
 
-    avg_polarity = sum(polarity) / len(polarity) if polarity else 0
-    response_type = (
-        "Positive response" if avg_polarity > 0.05
-        else "Negative response" if avg_polarity < -0.05
-        else "Neutral response"
-    )
+    if any(keyword in words for keyword in caretaker_keywords):
+        mentioned_people.append('พี่เลี้ยง')
 
-    most_positive_comment = comments[polarity.index(max(polarity))] if polarity else "N/A"
-    most_negative_comment = comments[polarity.index(min(polarity))] if polarity else "N/A"
-
-    return polarity, positive_comments, negative_comments, neutral_comments, avg_polarity, response_type, most_positive_comment, most_negative_comment
-
+    return list(set(mentioned_people))  # Remove duplicates
 
 @app.route('/', methods=['GET'])
 def test_api():
     return jsonify({'message': 'This page is for testing the API.'})
-
 
 @app.route('/analyze', methods=['POST'])
 def analyze_comments():
@@ -101,7 +79,7 @@ def analyze_comments():
 
         # Fetch comments
         while True:
-            request_comments = youtube.commentThreads().list(  # Rename to avoid conflict
+            request_comments = youtube.commentThreads().list(
                 part='snippet',
                 videoId=video_id,
                 maxResults=100,
@@ -137,35 +115,37 @@ def analyze_comments():
 
             if (any(char.isalnum() for char in comment_text)) and not hyperlink_pattern.search(comment_text):
                 if emojis == 0 or (text_characters / (text_characters + emojis)) > threshold_ratio:
-                    relevant_comments.append(comment_text)
+                    relevant_comments.append(comment)
 
-        # Save relevant comments to a text file
-        with open("ytcomments.txt", 'w', encoding='utf-8') as f:
-            for comment in relevant_comments:
-                f.write(f"{comment}\n")
+        results = []
+        print("Analyzing Comments...")
 
-        print("Comments stored successfully!")
+        for comment in relevant_comments:
+            comment_text = comment['text']
+            sentiment_score = analyze_sentiment(comment_text)
 
-        # Analyze sentiment for the comments read from the file
-        (
-            polarity, positive_comments, negative_comments,
-            neutral_comments, avg_polarity, response_type,
-            most_positive_comment, most_negative_comment
-        ) = analyze_comments_from_file("ytcomments.txt")
+            if sentiment_score > 0.05:
+                sentiment_label = "Positive"
+            elif sentiment_score < -0.05:
+                sentiment_label = "Negative"
+            else:
+                sentiment_label = "Neutral"
 
-        # Prepare results
-        sentiment_results = {
-            "average_polarity": avg_polarity,
-            "response_type": response_type,
-            "most_positive_comment": most_positive_comment.strip(),
-            "most_negative_comment": most_negative_comment.strip(),
-            "positive_comments": positive_comments,
-            "negative_comments": negative_comments,
-            "neutral_comments": neutral_comments,
-            "total_comments": len(relevant_comments)
-        }
+            # Find mentioned people in the comment
+            mentioned_people = find_people_in_comment(comment_text)
 
-        return jsonify(sentiment_results)
+            results.append({
+                "commenter": comment['author'],
+                "comment": comment_text,
+                "sentiment": sentiment_label,
+                "sentiment_score": sentiment_score,
+                "mentioned_people": mentioned_people or "None"
+            })
+
+        return jsonify({
+            "total_comments": len(relevant_comments),
+            "results": results
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
