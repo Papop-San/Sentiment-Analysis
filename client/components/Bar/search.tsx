@@ -1,16 +1,16 @@
 'use client';
-
 import React, { useState, useEffect, useRef } from 'react';
 
 interface SearchBarProps {
-  onSubmit: (url: string) => void; // Declare the onSubmit prop type
+  onSubmit: (data: { url: string; category: string }) => void; // Include category
+  initialCategory: string; 
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSubmit, initialCategory }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All categories');
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchTerm, setSearchTerm] = useState('');
-  const categories = ['All comment', 'Positive', 'Negative', 'Natural', 'Graph'];
+  const categories = ['All comment', 'Positive', 'Negative', 'Neutral']; // Adjust categories as needed
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -30,11 +30,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm) {
-      onSubmit(searchTerm); // Trigger the onSubmit callback with the search term
+      const data = { url: searchTerm, category: selectedCategory }; // Include category in submitted data
+      console.log("Submitted data:", data); // Log the submitted data
+      onSubmit(data); // Send the JSON object to the parent
     }
   };
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -49,7 +50,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
   }, []);
 
   return (
-    <div className="relative"> {/* Added relative positioning */}
+    <div className="relative">
       <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
         <div className="flex">
           <button
@@ -78,7 +79,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
 
           {dropdownVisible && (
             <div
-              ref={dropdownRef} // Attach the ref to the dropdown
+              ref={dropdownRef}
               id="dropdown"
               className="absolute z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700"
             >
@@ -87,7 +88,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit }) => {
                   <li key={category}>
                     <button
                       type="button"
-                      className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white z-50" // Added z-50 to button
+                      className="inline-flex w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                       onClick={() => handleCategorySelect(category)}
                     >
                       {category}

@@ -5,8 +5,11 @@ import emoji
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from pythainlp import word_tokenize
 from pythainlp.corpus.common import thai_stopwords
+from flask_cors import CORS
+import traceback
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # Initialize the SentimentIntensityAnalyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -148,6 +151,7 @@ def analyze_comments():
         })
 
     except Exception as e:
+        print(traceback.format_exc())  # Print stack trace to console
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

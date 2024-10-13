@@ -1,16 +1,36 @@
 'use client';
-
 import React, { useState } from 'react';
-import SeachBar from "@/components/Bar/search";
-import Analysis from "@/components/Bar/analysis";
-
+import SearchBar from "@/components/Bar/search";
+import ResultBorder from "@/components/Bar/analysis"; 
+import axios from 'axios';
 
 export default function Home() {
-  const [submittedUrl, setSubmittedUrl] = useState< string | null>(null);
+  const [submittedData, setSubmittedData] = useState<{ url: string; category: string } | null>(null); 
+  const [data, setData] = useState<any>(null); 
+  const [message, setMessage] = useState<string | null>(null); 
+  const [loading, setLoading] = useState<boolean>(false); 
 
-  const handleSearchSubmit = (url: string) => {
-    setSubmittedUrl(url); 
+  const handleSearchSubmit = (data: { url: string; category: string }) => {
+    setSubmittedData(data); 
+    fetchData(data.url); 
   };
+
+  const fetchData = async (url: string) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL; 
+    setLoading(true); 
+    try {
+      const response = await axios.post(`${apiUrl}analyze`, { url });
+      console.log(response.data); 
+      setMessage(null);
+      setData(response.data); 
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setMessage('Error fetching data. Please try again.'); 
+    } finally {
+      setLoading(false); 
+    }
+  };
+
   return (
     <div className="m-5">
       <div>
@@ -20,11 +40,22 @@ export default function Home() {
       </div>
 
       <div className="mt-3">
-        <SeachBar onSubmit={handleSearchSubmit} />
+        <SearchBar onSubmit={handleSearchSubmit} initialCategory="All comment" />
       </div>
 
       <div className="mx-3 items-center">
-        {submittedUrl && <Analysis submittedUrl={submittedUrl} />} 
+        {loading ? (
+          <p className="text-blue-500">Loading...</p> 
+        ) : (
+          submittedData && data && (
+            <>
+              <ResultBorder 
+                comments={data.results} 
+                selectedCategory={submittedData.category} // Pass selected category to ResultBorder
+              />
+            </>
+          )
+        )}
       </div>
     </div>
   );
