@@ -25,11 +25,11 @@ export default function Home() {
       console.log(response.data); 
       setMessage(null);
       setData(response.data); 
-      setShowGraph(true); // Show graph after fetching data
+      setShowGraph(true); 
     } catch (error) {
       console.error('Error fetching data:', error);
       setMessage('Error fetching data. Please try again.'); 
-      setShowGraph(false); // Hide graph on error
+      setShowGraph(false); 
     } finally {
       setLoading(false); 
     }

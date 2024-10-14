@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface SearchBarProps {
-  onSubmit: (data: { url: string; category: string }) => void; // Include category
+  onSubmit: (data: { url: string; category: string }) => void;
   initialCategory: string; 
 }
 
@@ -10,7 +10,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit, initialCategory }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchTerm, setSearchTerm] = useState('');
-  const categories = ['All comment', 'Positive', 'Negative', 'Neutral']; // Adjust categories as needed
+  const categories = ['All comment', 'Positive', 'Negative', 'Neutral']; 
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -30,9 +30,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSubmit, initialCategory }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm) {
-      const data = { url: searchTerm, category: selectedCategory }; // Include category in submitted data
-      console.log("Submitted data:", data); // Log the submitted data
-      onSubmit(data); // Send the JSON object to the parent
+      const data = { url: searchTerm, category: selectedCategory }; 
+      console.log("Submitted data:", data); 
+      onSubmit(data); 
     }
   };
 
