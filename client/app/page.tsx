@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import SearchBar from "@/components/Bar/search";
 import ResultBorder from "@/components/Bar/analysis"; 
+import Graph from '@/components/Bar/graph';
 import axios from 'axios';
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
   const [data, setData] = useState<any>(null); 
   const [message, setMessage] = useState<string | null>(null); 
   const [loading, setLoading] = useState<boolean>(false); 
+  const [showGraph, setShowGraph] = useState<boolean>(false); 
 
   const handleSearchSubmit = (data: { url: string; category: string }) => {
     setSubmittedData(data); 
@@ -23,9 +25,11 @@ export default function Home() {
       console.log(response.data); 
       setMessage(null);
       setData(response.data); 
+      setShowGraph(true); // Show graph after fetching data
     } catch (error) {
       console.error('Error fetching data:', error);
       setMessage('Error fetching data. Please try again.'); 
+      setShowGraph(false); // Hide graph on error
     } finally {
       setLoading(false); 
     }
@@ -45,14 +49,15 @@ export default function Home() {
 
       <div className="mx-3 items-center">
         {loading ? (
-          <p className="text-blue-500">Loading...</p> 
+          <p className="text-green-500 text-center py-5">Loading...</p> 
         ) : (
           submittedData && data && (
             <>
               <ResultBorder 
                 comments={data.results} 
-                selectedCategory={submittedData.category} // Pass selected category to ResultBorder
+                selectedCategory={submittedData.category} 
               />
+              {showGraph && <Graph data={data} />} 
             </>
           )
         )}

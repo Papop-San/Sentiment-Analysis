@@ -28,6 +28,20 @@ const ResultBorder: React.FC<ResultBorderProps> = ({ comments, selectedCategory 
     ? comments 
     : comments.filter(comment => comment.sentiment.trim().toLowerCase() === selectedCategory.trim().toLowerCase());
 
+  // Function to return appropriate background class based on sentiment
+  const getSentimentBgClass = (sentiment: string) => {
+    switch (sentiment.trim().toLowerCase()) {
+      case 'positive':
+        return 'group-hover:bg-green-500'; // Green background for positive
+      case 'negative':
+        return 'group-hover:bg-red-500'; // Red background for negative
+      case 'neutral':
+        return 'group-hover:bg-gray-500'; // Gray background for neutral
+      default:
+        return 'group-hover:bg-black'; // Default black background for other cases
+    }
+  };
+
   return (
     <div className="flex justify-center items-center mt-14">
       <Card className="w-[1080px]">
@@ -39,7 +53,9 @@ const ResultBorder: React.FC<ResultBorderProps> = ({ comments, selectedCategory 
                   title={
                     <span className="relative group">
                       Comment By: <span className="font-bold">{comment.commenter.replace('@', '')}</span>
-                      <span className="absolute left-0 bottom-full mb-1 hidden group-hover:block bg-gray-700 text-white text-sm rounded p-1">
+                      <span 
+                        className={`absolute left-0 bottom-full mb-1 hidden group-hover:block text-white text-sm rounded p-1 ${getSentimentBgClass(comment.sentiment)}`}
+                      >
                         {comment.sentiment}
                       </span>
                     </span>

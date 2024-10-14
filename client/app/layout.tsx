@@ -43,9 +43,17 @@ export default function RootLayout({
         <Providers>
           <div className="relative flex flex-col h-screen">
             
-            <main className="absolute inset-0 h-full w-full bg-white bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
+          <div className="transition-transform duration-300">
+          <main
+            className={clsx(
+              "relative min-h-screen w-full bg-white", // Change absolute to relative and keep min-h-screen
+              "grid grid-cols-1 grid-rows-1",
+              "bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+            )}
+            >
               {children}
             </main>
+          </div>
             
           </div>
         </Providers>
