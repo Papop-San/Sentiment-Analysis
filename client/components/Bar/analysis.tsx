@@ -65,6 +65,7 @@ const ResultBorder: React.FC<ResultBorderProps> = ({ comments, selectedCategory 
                   <p><strong>Comment:</strong> {comment.comment}</p>
                   <p><strong>Mention: </strong>{comment.mentioned_people}</p>
                   <p><strong>Sentiment Score:</strong> {comment.sentiment_score}</p>
+                  <p><strong>Catagory  :</strong> {comment.comment}</p>
                 </AccordionItem>
               </Accordion>
             ))
