@@ -25,4 +25,4 @@
     - python app.py
 
 
-# You must be run to Directory in the same time for Analyze for show on Website
+# You must be run to Program in Directory the same time for Analyze for show on Website
