@@ -39,7 +39,7 @@ export default function Home() {
     <div className="m-5">
       <div>
         <span className="text-3xl font-semibold text-gray-800 typing-text">
-          Segmentation Analysis
+          Sentiment analysis
         </span>
       </div>
 
