@@ -1,4 +1,4 @@
-# entiment Analysis of Thai Viewers  on YouTube 
+# Sentiment Analysis of Thai Viewers  on YouTube 
 #Template 
 
 
