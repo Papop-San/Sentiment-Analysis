@@ -20,26 +20,28 @@ const Graph: React.FC<GraphProps> = ({ data }) => {
           echarts.getInstanceByDom(chartRef.current) ||
           echarts.init(chartRef.current);
 
+        // Ensure sentiment counts include all categories and default to 0 if missing
         const sentimentCounts = data.results.reduce(
           (acc: any, comment: any) => {
             acc[comment.sentiment] = (acc[comment.sentiment] || 0) + 1;
-
             return acc;
           },
-          {},
+          { Positive: 0, Negative: 0, Neutral: 0 }, // Default to 0 if not present
         );
+
+        // Calculate total comments for percentage calculation
+        const totalComments =
+          sentimentCounts["Positive"] +
+          sentimentCounts["Negative"] +
+          sentimentCounts["Neutral"];
 
         let option: echarts.EChartsOption;
 
         if (chartType === "pie") {
           option = {
-            title: {
-              text: "Sentiment Analysis",
-              subtext: "Based on Comments",
-              left: "center",
-            },
             tooltip: {
               trigger: "item",
+              formatter: "{a} <br/>{b}: {c} ({d}%)", // Includes the percentage in the tooltip
             },
             legend: {
               orient: "vertical",
@@ -52,9 +54,27 @@ const Graph: React.FC<GraphProps> = ({ data }) => {
                 type: "pie",
                 radius: "50%",
                 data: [
-                  { value: sentimentCounts["Positive"] || 0, name: "Positive" },
-                  { value: sentimentCounts["Negative"] || 0, name: "Negative" },
-                  { value: sentimentCounts["Neutral"] || 0, name: "Neutral" },
+                  {
+                    value: sentimentCounts["Positive"],
+                    name: `Positive (${(
+                      (sentimentCounts["Positive"] / totalComments) *
+                      100
+                    ).toFixed(2)}%)`,
+                  },
+                  {
+                    value: sentimentCounts["Negative"],
+                    name: `Negative (${(
+                      (sentimentCounts["Negative"] / totalComments) *
+                      100
+                    ).toFixed(2)}%)`,
+                  },
+                  {
+                    value: sentimentCounts["Neutral"],
+                    name: `Neutral (${(
+                      (sentimentCounts["Neutral"] / totalComments) *
+                      100
+                    ).toFixed(2)}%)`,
+                  },
                 ],
                 emphasis: {
                   itemStyle: {
@@ -72,7 +92,12 @@ const Graph: React.FC<GraphProps> = ({ data }) => {
               text: "Sentiment Analysis (Bar Chart)",
               left: "center",
             },
-            tooltip: {},
+            tooltip: {
+              trigger: "axis",
+              axisPointer: {
+                type: "shadow",
+              },
+            },
             xAxis: {
               type: "category",
               data: ["Positive", "Negative", "Neutral"],
@@ -85,15 +110,25 @@ const Graph: React.FC<GraphProps> = ({ data }) => {
                 name: "Count",
                 type: "bar",
                 data: [
-                  sentimentCounts["Positive"] || 0,
-                  sentimentCounts["Negative"] || 0,
-                  sentimentCounts["Neutral"] || 0,
+                  sentimentCounts["Positive"],
+                  sentimentCounts["Negative"],
+                  sentimentCounts["Neutral"],
                 ],
                 itemStyle: {
                   color: (params) => {
                     const colors = ["#4CAF50", "#F44336", "#FFC107"];
-
                     return colors[params.dataIndex];
+                  },
+                },
+                label: {
+                  show: true,
+                  position: "top",
+                  formatter: (params) => {
+                    const value = params.value;
+                    const percentage = ((value / totalComments) * 100).toFixed(
+                      2,
+                    );
+                    return `${percentage}%`; // Display percentage on top of each bar
                   },
                 },
               },

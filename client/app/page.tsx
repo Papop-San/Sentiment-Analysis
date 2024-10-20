@@ -37,9 +37,9 @@ export default function Home() {
 
   return (
     <div className="m-5">
-      <div>
-        <span className="text-3xl font-semibold text-gray-800 typing-text">
-          Sentiment analysis
+      <div className='text-center my-10'>
+        <span className="text-3xl font-semibold text-gray-800 typing-text ">
+        Sentiment Analysis of Thai Viewers  on YouTube 
         </span>
       </div>
 

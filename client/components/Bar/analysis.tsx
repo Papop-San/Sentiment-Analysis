@@ -34,8 +34,20 @@ const ResultBorder: React.FC<ResultBorderProps> = ({
       : comments.filter(
           (comment) =>
             comment.sentiment.trim().toLowerCase() ===
-            selectedCategory.trim().toLowerCase(),
+            selectedCategory.trim().toLowerCase()
         );
+
+
+  const totalComments = filteredComments.length;
+  const positiveCount = filteredComments.filter(
+    (comment) => comment.sentiment.trim().toLowerCase() === "positive"
+  ).length;
+  const negativeCount = filteredComments.filter(
+    (comment) => comment.sentiment.trim().toLowerCase() === "negative"
+  ).length;
+  const neutralCount = filteredComments.filter(
+    (comment) => comment.sentiment.trim().toLowerCase() === "neutral"
+  ).length;
 
   // Function to return appropriate background class based on sentiment
   const getSentimentBgClass = (sentiment: string) => {
@@ -54,12 +66,31 @@ const ResultBorder: React.FC<ResultBorderProps> = ({
   return (
     <div className="flex justify-center items-center mt-14">
       <Card className="w-[1080px]">
-        <CardBody className="overflow-y-auto py-2 max-h-[750px] h-auto flex flex-col items-center ">
+        <CardBody className="overflow-y-auto py-2 max-h-[750px] h-auto flex flex-col items-center">
+          {/* Display the total counts for each sentiment */}
+          <div className="mb-2 my-4 flex flex-wrap justify-center gap-4">
+            <span className="bg-slate-600 mb-1 text-white text-sm sm:text-xs md:text-sm rounded p-1">
+              Total Comments: {totalComments}
+            </span>
+            <span className="bg-green-500 mb-1 text-white text-sm sm:text-xs md:text-sm rounded p-1">
+              Positive: {positiveCount}
+            </span>
+            <span className="bg-red-500 mb-1 text-white text-sm sm:text-xs md:text-sm rounded p-1">
+              Negative: {negativeCount}
+            </span>
+            <span className="bg-gray-500 mb-1 text-white text-sm sm:text-xs md:text-sm rounded p-1">
+              Neutral: {neutralCount}
+            </span>
+          </div>
+
           {filteredComments.length > 0 ? (
             filteredComments.slice(0, visibleTracks).map((comment, index) => (
               <Accordion key={index} className="py-2">
                 <AccordionItem
-                  textValue={`Comment by ${comment.commenter.replace("@", "")}: ${comment.comment}`}
+                  textValue={`Comment by ${comment.commenter.replace(
+                    "@",
+                    ""
+                  )}: ${comment.comment}`}
                   title={
                     <span className="relative group">
                       Comment By:{" "}
@@ -67,7 +98,9 @@ const ResultBorder: React.FC<ResultBorderProps> = ({
                         {comment.commenter.replace("@", "")}
                       </span>
                       <span
-                        className={`absolute left-0 bottom-full mb-1 hidden group-hover:block text-white text-sm rounded p-1 ${getSentimentBgClass(comment.sentiment)}`}
+                        className={`absolute left-0 bottom-full mb-1 hidden group-hover:block text-white text-sm rounded p-1 ${getSentimentBgClass(
+                          comment.sentiment
+                        )}`}
                       >
                         {comment.sentiment}
                       </span>

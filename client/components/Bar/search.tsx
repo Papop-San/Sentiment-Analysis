@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 
+
 interface SearchBarProps {
   onSubmit: (data: { url: string; category: string }) => void;
   initialCategory: string; 
